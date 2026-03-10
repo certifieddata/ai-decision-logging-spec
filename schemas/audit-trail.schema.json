@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://syntheticdatanews.com/ai-decision-logging-spec/schemas/audit-trail/0.1.0",
+  "title": "AI Audit Trail Export",
+  "description": "A structured, optionally signed audit trail export containing an ordered sequence of decision records. Designed for regulatory submission under EU AI Act Article 19. Conforms to AI Decision Logging Specification v0.1.0.",
+  "type": "object",
+  "required": [
+    "audit_trail_id",
+    "schema_version",
+    "created_at",
+    "period",
+    "decisions"
+  ],
+  "properties": {
+    "audit_trail_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "REQUIRED. Unique identifier for this audit trail export."
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "REQUIRED. Version of the AI Decision Logging Specification used."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "REQUIRED. ISO 8601 UTC timestamp when this export was generated."
+    },
+    "period": {
+      "type": "object",
+      "required": ["from", "to"],
+      "description": "REQUIRED. The time range covered by this audit trail.",
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Start of the audit period (inclusive)."
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time",
+          "description": "End of the audit period (inclusive)."
+        }
+      },
+      "additionalProperties": false
+    },
+    "system_id": {
+      "type": "string",
+      "description": "RECOMMENDED. AI system identifier."
+    },
+    "operator_id": {
+      "type": "string",
+      "description": "RECOMMENDED. Deployer or operator identifier."
+    },
+    "model_version": {
+      "type": "string",
+      "description": "RECOMMENDED. Primary model version during this period."
+    },
+    "policy_version": {
+      "type": "string",
+      "description": "RECOMMENDED. Policy version active during this period."
+    },
+    "artifact_certificate_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "RECOMMENDED. Certificate ID of the primary certified artifact for this system."
+    },
+    "artifact_certificate_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "RECOMMENDED. Verification URL for the artifact certificate."
+    },
+    "total_decisions": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "RECOMMENDED. Total number of decision records in this export. MUST equal the length of the decisions array."
+    },
+    "sterilized": {
+      "type": "boolean",
+      "description": "RECOMMENDED. If true, individual records in this export have been sterilized — sensitive fields redacted for public or regulatory export.",
+      "default": false
+    },
+    "decisions": {
+      "type": "array",
+      "description": "REQUIRED. Ordered array of decision records forming the tamper-evident chain. Records MUST appear in chronological order.",
+      "items": {
+        "$ref": "https://syntheticdatanews.com/ai-decision-logging-spec/schemas/decision-record/0.1.0"
+      }
+    },
+    "chain_integrity": {
+      "type": "object",
+      "description": "RECOMMENDED. Summary of the hash chain for quick verification.",
+      "properties": {
+        "first_record_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "description": "The record_hash of the first record in the decisions array."
+        },
+        "last_record_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "description": "The record_hash of the last record in the decisions array."
+        },
+        "chain_verified": {
+          "type": "boolean",
+          "description": "Whether the full hash chain was verified at export time."
+        },
+        "verification_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the chain was last verified."
+        }
+      },
+      "additionalProperties": false
+    },
+    "integrity": {
+      "type": "object",
+      "description": "OPTIONAL. Cryptographic signature over the full audit trail export.",
+      "required": ["signature_algorithm", "signature"],
+      "properties": {
+        "signature_algorithm": {
+          "type": "string",
+          "enum": ["Ed25519"],
+          "description": "REQUIRED if signing. Algorithm used. MUST be Ed25519."
+        },
+        "public_key_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "REQUIRED if signing. URL of the signing key in JWKS format."
+        },
+        "signature": {
+          "type": "string",
+          "description": "REQUIRED if signing. Base64url-encoded Ed25519 signature over the canonical export body (RFC 8785), excluding this field."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

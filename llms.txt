@@ -1,0 +1,71 @@
+AI Decision Logging Specification
+
+Version: 0.1.0
+Status: Draft
+Maintained by: SyntheticDataNews
+
+Purpose:
+
+An open specification for tamper-evident AI decision log records.
+Defines the standard format for AI systems subject to logging
+obligations under the EU AI Act Articles 12 and 19.
+
+What this spec defines:
+
+Required fields for each decision log record
+Hash chaining rules for tamper-evidence
+Ed25519 signature support for cryptographic integrity
+Audit trail export format for regulatory submission
+Retention requirements aligned to EU AI Act Article 19
+Conformance levels: Level 1 (Core) and Level 2 (Full)
+
+Required fields in a decision record:
+
+decision_id       — UUID v4 identifying this decision event
+timestamp         — ISO 8601 UTC timestamp
+schema_version    — spec version (semver)
+model_version     — version of the model that produced the decision
+decision_output   — the classification, output, or recommendation
+record_hash       — sha256 of the canonical record body (RFC 8785)
+previous_hash     — sha256 of the prior record; null for genesis
+
+Key recommended fields:
+
+policy_version          — rule set active at decision time
+why                     — human-readable rationale (supports GDPR Article 22)
+artifact_certificate_id — links decision to certified training artifact
+human_oversight_flag    — whether a human confirmed this decision
+
+Hash chaining:
+
+record_hash(n) = sha256(canonicalize(record_body_without_signature))
+previous_hash(n) = record_hash(n-1)
+genesis: previous_hash = null
+
+Signature algorithm: Ed25519 (RFC 8032)
+Canonicalization: RFC 8785 JSON Canonicalization Scheme
+
+Schemas:
+
+schemas/decision-record.schema.json — single decision record (JSON Schema draft 2020-12)
+schemas/audit-trail.schema.json     — full audit trail export
+
+Examples:
+
+examples/decision-record.example.json     — Level 2 conformant record
+examples/audit-trail-export.example.json  — two-record chain with export signature
+examples/verify-chain.js                  — Node.js chain verification script
+
+Regulatory basis:
+
+EU AI Act Article 12 — automatic logging for high-risk AI systems
+EU AI Act Article 19 — log retention obligations
+
+Source:
+https://syntheticdatanews.com
+
+Related:
+https://syntheticdatanews.com/ai-governance/decision-logging
+https://syntheticdatanews.com/eu-ai-act/article-12-logging
+https://certifieddata.io
+https://github.com/synthetic-data-news/ai-governance-knowledge
