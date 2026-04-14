@@ -54,7 +54,7 @@ chain integrity anchors → log_checkpoints table (periodic signed checkpoints)
 artifact certificates   → certificates table + certificate_transparency_log
 artifact registrations  → artifact_registrations table
 audit-vault archival    → audit_vault_records table (7-year retention)
-signing key registry    → certificate_signing_keys table
+signing key registry    → https://certifieddata.io/.well-known/signing-keys.json (live; Ed25519 public keys)
 
 Schemas:
 

@@ -11,6 +11,16 @@ Maintained by [CertifiedData](https://certifieddata.io).
 
 ---
 
+## Stewardship
+
+This specification is maintained by [CertifiedData](https://certifieddata.io), which also operates the reference implementation. CertifiedData developed the format in practice and publishes it as an open specification so that other systems can produce conformant records.
+
+The spec is deliberately implementation-agnostic at the format layer — any system can conform. CertifiedData's role is to keep the spec accurate, maintain alignment with the reference implementation, and incorporate feedback from other implementors. See [GOVERNANCE.md](GOVERNANCE.md) for the change process.
+
+[SyntheticDataNews](https://syntheticdatanews.com) provides editorial and educational coverage of AI governance topics, including decision logging. It is not the steward of this specification.
+
+---
+
 ## What This Is
 
 This repository defines an open, implementation-agnostic specification for structured AI decision log records. It establishes:
@@ -110,9 +120,28 @@ See [SPEC.md §14](SPEC.md#14-conformance) for full conformance criteria.
 
 ---
 
+## CertifiedData Implementation Mapping
+
+The following table maps public spec terminology to the CertifiedData reference implementation. This is provided for orientation; the spec is not tied to this implementation.
+
+| Spec concept | CertifiedData primitive |
+|---|---|
+| Decision record | `decision_records` — full signed record with `record_hash`, `previous_hash`, `canonical_payload`, `signature`, `key_id` |
+| Public-safe / redacted record | `public_decision_log` — parallel public chain with `public_payload`, `public_hash`, `previous_public_hash`, `signature` |
+| Chain integrity anchor | `log_checkpoints` — periodic signed anchors capturing tail hash, record count, and `checkpoint_hash` |
+| Artifact certificate | `certificates` — signed payload with `signing_key_id`, `signature`, 7-year `retention_until` |
+| Certificate transparency | `certificate_transparency_log` — append-only hash-chained issuance log |
+| Artifact registration | `artifact_registrations` — artifact hash, trust level, provenance claims, issuer |
+| Audit vault | `audit_vault_records` — durable archival evidence; append-only; 7-year retention |
+| Public key registry | `/.well-known/signing-keys.json` — live; returns all active and rotated Ed25519 keys |
+
+See [SPEC.md §3](SPEC.md#3-terminology) for full terminology definitions and inline implementation notes.
+
+---
+
 ## Implementations
 
-See [implementations/README.md](implementations/README.md) for known implementations and integrations.
+See [REFERENCE_IMPLEMENTATIONS.md](REFERENCE_IMPLEMENTATIONS.md) for known implementations and integrations.
 
 The CertifiedData platform is the reference implementation. It implements Level 2 (Full) conformance, including Ed25519 signing, hash-chained decision records, a publicly verifiable transparency log, and audit-vault archival with 7-year retention.
 

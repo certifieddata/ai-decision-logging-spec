@@ -44,7 +44,7 @@ CertifiedData implementation mapping:
   transparency log        → certificate_transparency_log (hash-chained append-only issuance log)
   artifact registration   → artifact_registrations (artifact_hash, trust_level, provenance, claims)
   audit vault             → audit_vault_records (signed archival; 7-year retention_until)
-  signing keys            → certificate_signing_keys (key_id, alg, public_key)
+  signing keys            → https://certifieddata.io/.well-known/signing-keys.json (live; all active + rotated Ed25519 keys; key_id, alg, public_key_pem, public_key_raw_b64url)
 
 ---
 

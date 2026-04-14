@@ -311,6 +311,8 @@ If signatures are used, the signing key MUST be published at a stable, publicly 
 https://{authority}/.well-known/signing-keys.json
 ```
 
+> *CertifiedData implementation note:* the signing key registry is live at `https://certifieddata.io/.well-known/signing-keys.json`. It returns all active and rotated keys (revoked keys are excluded). Each entry includes `key_id`, `algorithm`, `public_key_pem`, `public_key_raw_b64url` (raw 32-byte Ed25519 key, base64url-encoded for verifiers that cannot parse PEM), `status`, and `created_at`. The `key_id` field written into every signed record matches the `key_id` in this registry.
+
 ### 9.4 Key Rotation
 
 Signing keys SHOULD be rotated periodically. All previously issued signatures remain verifiable against the key that signed them. Historical public keys MUST be retained indefinitely with their validity periods documented.
