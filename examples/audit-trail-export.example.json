@@ -34,7 +34,7 @@
       "system_id": "anomaly-detection-prod-eu",
       "jurisdiction": "EU",
       "sterilized": false,
-      "record_hash": "sha256:aaaa1111bbbb2222cccc3333dddd4444eeee5555ffff6666aaaa1111bbbb2222cc",
+      "record_hash": "sha256:fc69286f816f74dcf78501be0a5adabce218726f791a38d9838deab846873058",
       "previous_hash": null
     },
     {
@@ -55,13 +55,13 @@
       "system_id": "anomaly-detection-prod-eu",
       "jurisdiction": "EU",
       "sterilized": false,
-      "record_hash": "sha256:2dce29deee5d05d28399b4b4e85a9df4a8b5e6c7d8e9f0a1b2c3d4e5f6a7b8c9",
-      "previous_hash": "sha256:aaaa1111bbbb2222cccc3333dddd4444eeee5555ffff6666aaaa1111bbbb2222cc"
+      "record_hash": "sha256:d781267f309c479bead6c09446a740aa8eaf830567dc0f2eeaa8e8c63d44a585",
+      "previous_hash": "sha256:fc69286f816f74dcf78501be0a5adabce218726f791a38d9838deab846873058"
     }
   ],
   "chain_integrity": {
-    "first_record_hash": "sha256:aaaa1111bbbb2222cccc3333dddd4444eeee5555ffff6666aaaa1111bbbb2222cc",
-    "last_record_hash": "sha256:2dce29deee5d05d28399b4b4e85a9df4a8b5e6c7d8e9f0a1b2c3d4e5f6a7b8c9",
+    "first_record_hash": "sha256:fc69286f816f74dcf78501be0a5adabce218726f791a38d9838deab846873058",
+    "last_record_hash": "sha256:d781267f309c479bead6c09446a740aa8eaf830567dc0f2eeaa8e8c63d44a585",
     "chain_verified": true,
     "verification_timestamp": "2026-03-10T09:00:01Z"
   },

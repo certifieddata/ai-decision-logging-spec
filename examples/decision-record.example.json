@@ -21,7 +21,7 @@
   "system_id": "anomaly-detection-prod-eu",
   "jurisdiction": "EU",
   "sterilized": false,
-  "record_hash": "sha256:2dce29deee5d05d28399b4b4e85a9df4a8b5e6c7d8e9f0a1b2c3d4e5f6a7b8c9",
+  "record_hash": "sha256:9d120bd2d0e00714d00e69c4972dd77690fd2edd407fb052d00c98b252c90d0b",
   "previous_hash": "sha256:605f6b4cc9d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7",
   "signature": "Ed25519:<base64url-encoded-signature-over-canonical-body>"
 }

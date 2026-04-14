@@ -135,6 +135,10 @@
         }
       },
       "additionalProperties": false
+    },
+    "_comment": {
+      "type": "string",
+      "description": "OPTIONAL. Human-readable annotation for documentation and example files only. Not part of the canonical export body."
     }
   },
   "additionalProperties": false
