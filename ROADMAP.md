@@ -78,7 +78,7 @@ Key capabilities:
 
 ## How to Influence the Roadmap
 
-Open an issue on GitHub with the label `roadmap`. Provide:
+Open an issue at https://github.com/certifieddata/ai-decision-logging-spec with the label `roadmap`. Provide:
 - The use case you're trying to solve
 - Current workaround (if any)
 - Proposed change or extension

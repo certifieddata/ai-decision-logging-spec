@@ -2,7 +2,8 @@ AI Decision Logging Specification
 
 Version: 0.1.0
 Status: Draft
-Maintained by: SyntheticDataNews
+Maintained by: CertifiedData (https://certifieddata.io)
+Repository: https://github.com/certifieddata/ai-decision-logging-spec
 
 Purpose:
 
@@ -45,6 +46,16 @@ genesis: previous_hash = null
 Signature algorithm: Ed25519 (RFC 8032)
 Canonicalization: RFC 8785 JSON Canonicalization Scheme
 
+CertifiedData implementation primitives:
+
+decision records        → decision_records table
+public-safe records     → public_decision_log table (redacted; separate public chain)
+chain integrity anchors → log_checkpoints table (periodic signed checkpoints)
+artifact certificates   → certificates table + certificate_transparency_log
+artifact registrations  → artifact_registrations table
+audit-vault archival    → audit_vault_records table (7-year retention)
+signing key registry    → certificate_signing_keys table
+
 Schemas:
 
 schemas/decision-record.schema.json — single decision record (JSON Schema draft 2020-12)
@@ -62,10 +73,8 @@ EU AI Act Article 12 — automatic logging for high-risk AI systems
 EU AI Act Article 19 — log retention obligations
 
 Source:
-https://syntheticdatanews.com
+https://certifieddata.io
 
 Related:
+https://certifieddata.io/how-it-works
 https://syntheticdatanews.com/ai-governance/decision-logging
-https://syntheticdatanews.com/eu-ai-act/article-12-logging
-https://certifieddata.io
-https://github.com/synthetic-data-news/ai-governance-knowledge

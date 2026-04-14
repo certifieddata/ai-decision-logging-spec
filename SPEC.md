@@ -1,10 +1,10 @@
 # AI Decision Logging Specification
 
-**Version:** 0.1.0
-**Status:** Draft
-**Published:** 2026-03-10
-**Maintained by:** [SyntheticDataNews](https://syntheticdatanews.com)
-**Repository:** https://github.com/synthetic-data-news/ai-decision-logging-spec
+**Version:** 0.1.0  
+**Status:** Draft  
+**Published:** 2026-03-10  
+**Maintained by:** [CertifiedData](https://certifieddata.io)  
+**Repository:** https://github.com/certifieddata/ai-decision-logging-spec
 
 ---
 
@@ -83,15 +83,25 @@ This specification does **not** cover:
 
 **Decision record** — a structured log entry capturing a single AI system decision event.
 
+> *CertifiedData implementation mapping:* decision records are stored in the `decision_records` table, with fields including `record_hash`, `previous_hash`, `canonical_payload`, `signature`, and `key_id`. Each record is signed with Ed25519 at write time.
+
 **Audit trail** — an ordered, tamper-evident sequence of decision records covering a defined time period.
 
 **Hash chain** — a sequence of records where each record includes the cryptographic hash of the previous record, making retroactive modification detectable.
 
+**Chain integrity anchor** — a periodic checkpoint record that captures the hash state of the chain at a point in time, enabling partial verification without reprocessing the entire chain. Sometimes called a "checkpoint."
+
+> *CertifiedData implementation mapping:* chain integrity anchors are stored in `log_checkpoints`, which record the latest record hash, record count, and a signed checkpoint payload at configurable intervals.
+
 **Genesis record** — the first record in a hash chain. Its `previous_hash` field is `null`.
 
-**Sterilized record** — a decision record in which sensitive input fields have been redacted or summarized for public or regulatory export, while preserving the structural integrity of the chain.
+**Redacted record** — a decision record in which sensitive input fields have been redacted or summarized for public or regulatory export, while preserving the structural integrity of the chain. In JSON, redacted records carry `"sterilized": true` as a machine-readable flag (see §10.3).
 
-**Artifact certificate** — a signed record attesting to the provenance and integrity of an AI artifact such as a training dataset or model checkpoint. See [AI Artifact Certificate Specification](https://syntheticdatanews.com/synthetic-data/certification).
+> *CertifiedData implementation mapping:* the `public_decision_log` table stores the public-safe version of each decision record. The `public_payload` field contains the redacted content; `public_hash` and `previous_public_hash` maintain a separate public chain. The original full record remains in `decision_records` for internal verification.
+
+**Artifact certificate** — a signed record attesting to the provenance and integrity of an AI artifact such as a training dataset or model checkpoint.
+
+> *CertifiedData implementation mapping:* artifact certificates are stored in the `certificates` table (with `payload`, `signature`, `signing_key_id`, and `retention_until`). Certificate issuances are appended to `certificate_transparency_log` as an append-only hash-chained public log. Artifact-level registrations (hash, trust level, provenance claims) are stored in `artifact_registrations`. Long-term archival evidence is stored in `audit_vault_records` with a 7-year retention period.
 
 **Deployer** — an organization that operates a high-risk AI system in a production environment. Corresponds to "deployer" in EU AI Act Article 3(4).
 
@@ -140,7 +150,7 @@ The following fields MUST be present in every decision record.
 ### `decision_output`
 
 - **Type:** string
-- **Description:** The output, classification, recommendation, or action produced by the AI system for this event. MUST be human-readable. MUST NOT contain personally identifiable information in public or sterilized records.
+- **Description:** The output, classification, recommendation, or action produced by the AI system for this event. MUST be human-readable. MUST NOT contain personally identifiable information in public or redacted records.
 - **Example:** `"APPROVED"`, `"HIGH_RISK"`, `"NORMAL"`
 
 ### `record_hash`
@@ -176,7 +186,7 @@ The following fields SHOULD be present in decision records for high-risk AI syst
 ### `input_reference`
 
 - **Type:** string
-- **Description:** A reference to the input that triggered this decision. MAY be a hash, an opaque identifier, or a summary. MUST NOT be the full input content in public records. SHOULD be sufficient to reconstruct the input in a controlled audit context.
+- **Description:** A reference to the input that triggered this decision. MAY be a hash, an opaque identifier, or a summary. MUST NOT be the full input content in public or redacted records. SHOULD be sufficient to reconstruct the input in a controlled audit context.
 - **Example:** `"sha256:a3f1...batch-20260309T172000Z"`
 
 ### `confidence_score`
@@ -197,6 +207,8 @@ The following fields SHOULD be present in decision records for high-risk AI syst
 - **Description:** The `certificate_id` of the certified artifact (e.g., training dataset) associated with this decision. Links this decision record to the artifact certification chain.
 - **Example:** `"233805c1-a1b2-4c3d-8e9f-0a1b2c3d4e5f"`
 
+> *CertifiedData implementation mapping:* maps to `decision_records.certificate_id`, which references the `certificates` table.
+
 ### `operator_id`
 
 - **Type:** string
@@ -206,8 +218,10 @@ The following fields SHOULD be present in decision records for high-risk AI syst
 ### `why`
 
 - **Type:** string
-- **Description:** A human-readable explanation or rationale summary for this decision. SHOULD be concise (1–3 sentences). MAY be sterilized or summarized for public records. Supports GDPR Article 22 right to explanation and EU AI Act transparency requirements.
+- **Description:** A human-readable explanation or rationale summary for this decision. SHOULD be concise (1–3 sentences). MAY be redacted or summarized for public records. Supports GDPR Article 22 right to explanation and EU AI Act transparency requirements.
 - **Example:** `"Score within normal seasonal range. No anomalous signals detected."`
+
+> *CertifiedData implementation mapping:* maps to `decision_records.rationale_summary`.
 
 ---
 
@@ -220,6 +234,8 @@ The following fields MAY be included.
 - **Type:** array of strings
 - **Description:** Structured list of signals or features that contributed to this decision.
 - **Example:** `["seasonality_adjusted", "no_latency_spike", "anomaly_score_0.03"]`
+
+> *CertifiedData implementation mapping:* maps to `decision_records.reason_codes`.
 
 ### `system_id`
 
@@ -267,6 +283,12 @@ A chain is **intact** if all hashes verify. A chain is **broken** if any hash do
 
 If a log store is partitioned (e.g., by day or by session), each segment MAY form its own chain. Segment boundaries SHOULD be documented. Cross-segment continuity MAY be maintained by including the last hash of the prior segment as the `previous_hash` of the first record in the next segment.
 
+### 8.4 Chain Integrity Anchors
+
+Implementations SHOULD periodically write **chain integrity anchors** (checkpoints) that capture the current tail hash and record count. Anchors allow partial verification of recent records without replaying the full chain from genesis.
+
+> *CertifiedData implementation note:* CertifiedData writes signed `log_checkpoints` records on a configurable schedule. Each checkpoint records `latest_record_hash`, `record_count`, `previous_checkpoint_hash`, and a signed `checkpoint_hash` to prevent anchor tampering.
+
 ---
 
 ## 9. Signatures
@@ -292,6 +314,8 @@ https://{authority}/.well-known/signing-keys.json
 ### 9.4 Key Rotation
 
 Signing keys SHOULD be rotated periodically. All previously issued signatures remain verifiable against the key that signed them. Historical public keys MUST be retained indefinitely with their validity periods documented.
+
+> *CertifiedData implementation mapping:* signing keys are stored in `certificate_signing_keys` with `key_id`, `alg`, and `public_key`. The `key_id` field is written into every signed record so verifiers can look up the correct key.
 
 ---
 
@@ -327,9 +351,13 @@ An audit trail export is a JSON object with the following fields:
 
 When an audit trail export is signed, the signed body is the canonical JSON (RFC 8785) of the export object with `integrity.signature` excluded.
 
-### 10.3 Sterilized Exports
+### 10.3 Redacted Exports
 
-Public or externally shared exports MAY omit or summarize sensitive fields (`input_reference`, `factors`) in individual records. The structural integrity of the hash chain MUST be preserved in sterilized exports. Sterilized records MUST include a `sterilized: true` boolean field.
+Public or externally shared exports MAY omit or summarize sensitive fields (`input_reference`, `factors`) in individual records. The structural integrity of the hash chain MUST be preserved in redacted exports. Redacted records MUST include a `sterilized: true` boolean field as a machine-readable indicator.
+
+> **Note on terminology:** The `sterilized` field name is a stable, machine-readable flag. In human-readable documentation and regulatory submissions, the preferred term is "redacted record" or "public-safe record." The field name is preserved across spec versions for backward compatibility.
+
+> *CertifiedData implementation mapping:* the `public_decision_log` table stores the public-safe version of each decision. `public_payload` contains the redacted fields. A separate `public_hash` chain runs in parallel to the full-record chain, allowing public chain verification without exposing private record content.
 
 ---
 
@@ -337,7 +365,9 @@ Public or externally shared exports MAY omit or summarize sensitive fields (`inp
 
 ### 11.1 Minimum Retention Period
 
-Deployers of high-risk AI systems subject to EU AI Act Article 19 MUST retain logs for a minimum of **six months** from the date of each record.
+Deployers of high-risk AI systems subject to EU AI Act Article 19 MUST retain logs for a minimum of **six months** from the date of each record. This is the regulatory floor; implementations SHOULD assess sector-specific requirements and retain longer where applicable.
+
+> *CertifiedData implementation note:* CertifiedData retains decision records, certificates, and audit vault records for **7 years** by default, which exceeds the regulatory minimum and aligns with financial services obligations.
 
 ### 11.2 Sector-Specific Requirements
 
@@ -358,6 +388,8 @@ Retained logs MUST be available for export within a reasonable timeframe upon re
 
 Logs MUST be stored in a manner that preserves hash chain integrity. Any storage system that permits modification of existing records without detection is non-compliant.
 
+> *CertifiedData implementation note:* CertifiedData stores durable archival evidence in `audit_vault_records`, which includes the signed artifact payload, archive provider, archive bucket path, and a `retention_until` timestamp. This table is append-only; records are never updated or deleted within their retention window.
+
 ---
 
 ## 12. Verification Procedures
@@ -371,7 +403,7 @@ To verify a single record:
 3. Serialize to canonical form (RFC 8785).
 4. Compute `SHA-256(canonical_form)`.
 5. Verify the result matches `record_hash`.
-6. If `signature` is present, verify against the issuer's public key.
+6. If `signature` is present, fetch the public key at the `public_key_url` and verify against the issuer's Ed25519 public key.
 
 ### 12.2 Chain Verification
 
@@ -437,10 +469,9 @@ An implementation MAY claim conformance at one of two levels:
 - [RFC 8032](https://datatracker.ietf.org/doc/html/rfc8032) — Edwards-Curve Digital Signature Algorithm (EdDSA) — Ed25519
 - [RFC 8259](https://datatracker.ietf.org/doc/html/rfc8259) — The JavaScript Object Notation (JSON) Data Interchange Format
 - [RFC 8785](https://www.rfc-editor.org/rfc/rfc8785) — JSON Canonicalization Scheme (JCS)
-- [AI Governance Knowledge Repository](https://github.com/synthetic-data-news/ai-governance-knowledge) — Related reference material
-- [SyntheticDataNews — Decision Logging](https://syntheticdatanews.com/ai-governance/decision-logging)
-- [SyntheticDataNews — AI Audit Trails](https://syntheticdatanews.com/ai-governance/audit-trails)
+- [CertifiedData.io](https://certifieddata.io) — Reference implementation and specification maintainer
+- [SyntheticDataNews — Decision Logging](https://syntheticdatanews.com/ai-governance/decision-logging) — Editorial overview
 
 ---
 
-*Maintained by [SyntheticDataNews](https://syntheticdatanews.com). Feedback welcome via [GitHub Issues](https://github.com/synthetic-data-news/ai-decision-logging-spec/issues).*
+*Maintained by [CertifiedData](https://certifieddata.io). Feedback welcome via [GitHub Issues](https://github.com/certifieddata/ai-decision-logging-spec/issues).*

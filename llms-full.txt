@@ -8,12 +8,9 @@ Provides a standardized format for recording and verifying AI system decisions
 for governance, auditing, and regulatory compliance.
 
 Specification location:
-https://github.com/synthetic-data-news/ai-decision-logging-spec
+https://github.com/certifieddata/ai-decision-logging-spec
 
-Educational overview:
-https://syntheticdatanews.com/ai-governance/decision-logging
-
-Reference implementation:
+Reference implementation and maintainer:
 https://certifieddata.io
 
 ---
@@ -31,10 +28,23 @@ This specification defines how to:
 Key concepts:
 - decision records: structured JSON objects capturing model version, input reference, output, confidence, and reasoning
 - hash chaining: SHA-256 hash of each record includes the hash of the prior record, creating a tamper-evident chain
-- Ed25519 signatures: cryptographic signatures over canonical (RFC 8785 JCS) JSON bodies
+- chain integrity anchors: periodic signed checkpoints capturing the chain tail hash and record count; enable partial verification without replaying the full chain
+- Ed25519 signatures: cryptographic signatures over canonical (RFC 8785 JCS) JSON bodies; signing key published at well-known URL
 - audit trail exports: time-bounded collections of decision records with chain integrity metadata
 - artifact certificate linkage: decision records may reference certified AI artifacts via certificate ID
-- sterilization: PII-redacted records that preserve chain integrity for privacy compliance
+- redacted records: PII-redacted records that preserve chain integrity for public or regulatory export; carry sterilized: true as a machine-readable flag
+
+---
+
+CertifiedData implementation mapping:
+  decision record         → decision_records (id, record_hash, previous_hash, canonical_payload, signature, key_id)
+  public-safe record      → public_decision_log (public_payload, public_hash, previous_public_hash, signature, key_id)
+  chain integrity anchor  → log_checkpoints (latest_record_hash, record_count, checkpoint_hash, signature)
+  artifact certificate    → certificates (payload, signature, signing_key_id, retention_until)
+  transparency log        → certificate_transparency_log (hash-chained append-only issuance log)
+  artifact registration   → artifact_registrations (artifact_hash, trust_level, provenance, claims)
+  audit vault             → audit_vault_records (signed archival; 7-year retention_until)
+  signing keys            → certificate_signing_keys (key_id, alg, public_key)
 
 ---
 
@@ -46,8 +56,14 @@ Conformance levels:
 
 Regulatory alignment:
   EU AI Act Article 12: automatic logging of events for high-risk AI systems
-  EU AI Act Article 19: retention of logs for the useful life of the AI system, minimum 10 years
+  EU AI Act Article 19: retention of logs; minimum period varies by sector and national law
   NIST AI RMF: supports GOVERN, MAP, MEASURE, and MANAGE functions
+
+Retention note:
+  The specification floor is 6 months (EU AI Act Article 19 general minimum).
+  The CertifiedData reference implementation retains decision records, certificates,
+  and audit vault records for 7 years by default, consistent with financial services
+  obligations. Healthcare implementations may require up to 15 years.
 
 ---
 
@@ -85,6 +101,6 @@ Related concepts:
 ---
 
 Related resources:
-  AI Governance Knowledge Base: https://github.com/synthetic-data-news/ai-governance-knowledge
-  SyntheticDataNews AI Governance: https://syntheticdatanews.com/ai-governance
   CertifiedData AI Artifact Certification: https://certifieddata.io
+  CertifiedData How It Works: https://certifieddata.io/how-it-works
+  SyntheticDataNews AI Governance: https://syntheticdatanews.com/ai-governance

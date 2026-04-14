@@ -7,9 +7,9 @@ abstract: >
   Ed25519 signature support, and audit trail export format for
   compliance with EU AI Act Articles 12 and 19.
 authors:
-  - name: SyntheticDataNews
-url: https://syntheticdatanews.com
-repository-code: https://github.com/synthetic-data-news/ai-decision-logging-spec
+  - name: CertifiedData
+url: https://certifieddata.io
+repository-code: https://github.com/certifieddata/ai-decision-logging-spec
 license: MIT
 keywords:
   - ai-governance

@@ -4,10 +4,10 @@
 
 A standard format for tamper-evident AI decision logs, designed for compliance with EU AI Act Articles 12 and 19 and comparable regulatory frameworks.
 
-Maintained by [SyntheticDataNews](https://syntheticdatanews.com).
+Maintained by [CertifiedData](https://certifieddata.io).
 
-**Educational overview:** https://syntheticdatanews.com/ai-governance/decision-logging
-**Reference implementation:** https://certifieddata.io
+**Reference implementation:** https://certifieddata.io  
+**Repository:** https://github.com/certifieddata/ai-decision-logging-spec
 
 ---
 
@@ -114,13 +114,14 @@ See [SPEC.md §14](SPEC.md#14-conformance) for full conformance criteria.
 
 See [implementations/README.md](implementations/README.md) for known implementations and integrations.
 
+The CertifiedData platform is the reference implementation. It implements Level 2 (Full) conformance, including Ed25519 signing, hash-chained decision records, a publicly verifiable transparency log, and audit-vault archival with 7-year retention.
+
 ---
 
 ## Related
 
-- **[AI Governance Knowledge Repository](https://github.com/synthetic-data-news/ai-governance-knowledge)** — reference material, schemas, and EU AI Act implementation notes
+- **[CertifiedData.io](https://certifieddata.io)** — reference implementation; also maintains this specification
 - **[SyntheticDataNews](https://syntheticdatanews.com)** — editorial coverage of AI governance and compliance
-- **[CertifiedData.io](https://certifieddata.io)** — currently maintains the reference implementation of this specification
 
 ---
 

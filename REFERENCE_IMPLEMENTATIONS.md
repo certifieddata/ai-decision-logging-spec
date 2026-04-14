@@ -11,7 +11,7 @@ This document lists known implementations of the AI Decision Logging Specificati
 | Level 1 | Core | Required fields, SHA-256 hash chaining, record integrity |
 | Level 2 | Full | Level 1 + Ed25519 signatures, audit trail export, artifact certificate linkage |
 
-See [SPEC.md](SPEC.md) §12 for full conformance criteria.
+See [SPEC.md](SPEC.md) §14 for full conformance criteria.
 
 ---
 
@@ -21,7 +21,13 @@ See [SPEC.md](SPEC.md) §12 for full conformance criteria.
 - **URL:** https://certifieddata.io
 - **Conformance:** Level 2 (Full)
 - **Verification:** Self-reported; independent audit pending
-- **Notes:** Reference implementation used to develop and validate the specification. Implements key management, signing infrastructure, and audit trail export API.
+- **Notes:** Reference implementation and specification maintainer. Implements:
+  - Ed25519 per-record signing via `certificate_signing_keys` (public keys published at `/.well-known/signing-keys.json`)
+  - Hash-chained `decision_records` with `record_hash`, `previous_hash`, and `canonical_payload`
+  - Parallel public chain in `public_decision_log` for redacted / public-safe record exports
+  - Periodic signed integrity anchors in `log_checkpoints`
+  - Artifact certification via `certificates` and `certificate_transparency_log`
+  - Audit-vault archival in `audit_vault_records` with 7-year retention
 
 ---
 
@@ -72,4 +78,4 @@ The specification does not define an API transport layer. Audit trail exports ma
 
 ---
 
-*To propose changes to this document, open a pull request or issue on GitHub.*
+*To propose changes to this document, open a pull request or issue at https://github.com/certifieddata/ai-decision-logging-spec.*

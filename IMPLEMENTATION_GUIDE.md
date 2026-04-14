@@ -243,3 +243,4 @@ Document your sterilization policy in your system's privacy documentation.
 - [GOVERNANCE.md](GOVERNANCE.md) — How to contribute or propose changes
 - [ROADMAP.md](ROADMAP.md) — What's coming next
 - [REFERENCE_IMPLEMENTATIONS.md](REFERENCE_IMPLEMENTATIONS.md) — Known implementations
+- [CertifiedData.io](https://certifieddata.io) — Reference implementation and specification maintainer
